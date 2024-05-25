@@ -1,7 +1,8 @@
 import jwt from "jsonwebtoken";
- import User from "../models/user.js";
 
-const tokenCheck =  (req, res, next) => {
+import User from "../models/user.js";
+
+const tokenCheck = (req, res, next) => {
   const authorizationHeader = req.header.authorization;
 
   if (typeof authorizationHeader === "undefined") {
@@ -14,31 +15,30 @@ const tokenCheck =  (req, res, next) => {
     return res.status(401).json({ message: "Invalid token" });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET, async(err, decode) => {
+  jwt.verify(token, process.env.JWT_SECRET, async (err, decode) => {
     if (err) {
       return res.status(401).json({ message: "Invalid token" });
     }
 
     try {
-        const user = await User.findById(decode.id);
+      const user = await User.findById(decode.id);
 
-        if (!user) {
-          return res.status(401).send({ message: "Not authorized" });
-        }
-  
-        if (user.token !== token) {
-          return res.status(401).send({ message: "Not authorized" });
-        }
-  
-        req.user = {
-          id: user._id,
-          name: user.email,
-        };
-        next();
+      if (!user) {
+        return res.status(401).send({ message: "Not authorized" });
+      }
+
+      if (user.token !== token) {
+        return res.status(401).send({ message: "Not authorized" });
+      }
+
+      req.user = {
+        id: user._id,
+        name: user.email,
+      };
+      next();
     } catch (error) {
-        next (error)
+      next(error);
     }
-    
   });
 };
 
