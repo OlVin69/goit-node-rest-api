@@ -9,7 +9,7 @@ import {
 
 export const getAllContacts = async (req, res, next) => {
   try {
-    const contactsList = await Contact.find({ ownerId: req.user.id });
+    const contactsList = await Contact.find({ owner: req.user.id });
     res.status(200).send(contactsList);
   } catch (error) {
     next(error);
@@ -23,7 +23,7 @@ export const getOneContact = async (req, res, next) => {
     if (!isValidObjectId(id)) {
       return res.status(400).json({ message: "Invalid Id" });
     }
-    const contact = await Contact.findByOne({ _id: id, owner: req.user.id });
+    const contact = await Contact.findOne({ _id: id, owner: req.user.id });
 
     if (contact) {
       res.status(200).json(contact);

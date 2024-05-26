@@ -88,7 +88,7 @@ const login = async (req, res, next) => {
     await User.findByIdAndUpdate(user._id, {
       token,
     });
-
+console.log(token);
     res.send({ token, user: { email, subscription: user.subscription } });
   } catch (error) {
     next(error);
@@ -133,7 +133,7 @@ const updateSubscription = async (req, res, next) => {
 
     const contact = await User.findById(id);
 
-    if (contact = null) {
+    if (contact === null) {
       return res.status(404).json({ message: "Not found" });
     }
 
