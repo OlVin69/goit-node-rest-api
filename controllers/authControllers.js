@@ -34,7 +34,6 @@ const register = async (req, res, next) => {
     await User.create({
       email: emailInLowerCase,
       password: passwordHash,
-      subscription,
     });
 
     res.status(201).json({
@@ -50,16 +49,19 @@ const register = async (req, res, next) => {
 
 const login = async (req, res, next) => {
   const { email, password } = req.body;
-  const emailInLowerCase = email.toLowerCase();
+  
 
   try {
     const { error } = createUserSchema.validate({
       email,
       password,
     });
+
     if (typeof error !== "undefined") {
       return res.status(400).json({ message: error.message });
     }
+
+    const emailInLowerCase = email.toLowerCase(); 
 
     const user = await User.findOne({ email: emailInLowerCase });
 
@@ -131,7 +133,7 @@ const updateSubscription = async (req, res, next) => {
 
     const contact = await User.findById(id);
 
-    if ((contact = null)) {
+    if (contact = null) {
       return res.status(404).json({ message: "Not found" });
     }
 
