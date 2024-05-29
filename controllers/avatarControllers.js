@@ -39,7 +39,7 @@ export const uploudAvatar = async (req, res, next) => {
     );
 
     if (user === null) {
-       return res.status(404).json({message: "Noy found"});
+       return res.status(404).json({message: "Not found"});
     }
     res.status(200).json(user);
   } catch (error) {
