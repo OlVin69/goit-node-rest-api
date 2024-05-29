@@ -1,5 +1,4 @@
 import bcrypt from "bcrypt";
-
 import jwt from "jsonwebtoken";
 
 import User from "../models/user.js";
@@ -8,6 +7,8 @@ import {
   createUserSchema,
   updateSubscriptionSchema,
 } from "../schemas/userSchema.js";
+
+import gravatar from "gravatar";
 
 const register = async (req, res, next) => {
   const { email, password } = req.body;
@@ -31,15 +32,23 @@ const register = async (req, res, next) => {
 
     const passwordHash = await bcrypt.hash(password, 10);
 
+    const avatarURL = gravatar.url(
+      email,
+      { s: "200", r: "x", d: "retro" },
+      false
+    );
+
     await User.create({
       email: emailInLowerCase,
       password: passwordHash,
+      avatarURL,
     });
 
     res.status(201).json({
       user: {
         email,
         subscription: "starter",
+        avatarURL,
       },
     });
   } catch (error) {
@@ -49,7 +58,6 @@ const register = async (req, res, next) => {
 
 const login = async (req, res, next) => {
   const { email, password } = req.body;
-  
 
   try {
     const { error } = createUserSchema.validate({
@@ -61,7 +69,7 @@ const login = async (req, res, next) => {
       return res.status(400).json({ message: error.message });
     }
 
-    const emailInLowerCase = email.toLowerCase(); 
+    const emailInLowerCase = email.toLowerCase();
 
     const user = await User.findOne({ email: emailInLowerCase });
 
@@ -88,7 +96,7 @@ const login = async (req, res, next) => {
     await User.findByIdAndUpdate(user._id, {
       token,
     });
-console.log(token);
+    console.log(token);
     res.send({ token, user: { email, subscription: user.subscription } });
   } catch (error) {
     next(error);
