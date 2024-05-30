@@ -8,6 +8,6 @@ const avatarRouter = express.Router();
 
 avatarRouter.get("/", getAvatar);
 
-avatarRouter.patch("/", uploadMiddleware.single("avatar"), uploudAvatar);
+avatarRouter.patch("/", uploadMiddleware.single("avatarURL"), uploudAvatar);
 
 export default avatarRouter;

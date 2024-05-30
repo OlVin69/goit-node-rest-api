@@ -18,7 +18,7 @@ app.use(express.json());
 app.use("/api/contacts", tokenCheck, contactsRouter);
 app.use("/api/users", authRouter);
 app.use("/api/users/avatars", tokenCheck, avatarRouter); 
-app.use("/api/avatars", express.static(path.resolve("public/avatars")));
+app.use("/avatars", express.static(path.resolve("public/avatars")));
 
 app.use((_, res) => {
   res.status(404).json({ message: "Route not found" });
