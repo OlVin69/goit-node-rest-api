@@ -21,7 +21,7 @@ export const getAvatar = async (req, res, next) => {
 
 export const uploudAvatar = async (req, res, next) => {
   if (!req.file) {
-    return res.status(400).send("Please select the avatar file");
+    return res.status(400).send({message: "Please select the avatar file"});
   }
   try {
     const avatarPath = path.resolve("public/avatars", req.file.filename);
@@ -41,7 +41,7 @@ export const uploudAvatar = async (req, res, next) => {
     if (user === null) {
        return res.status(404).json({message: "Not found"});
     }
-    res.status(200).json(user);
+    res.status(200).json({avatarURL: user.avatarURL});
   } catch (error) {
     next(error);
   }

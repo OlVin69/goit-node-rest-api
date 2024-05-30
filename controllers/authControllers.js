@@ -35,7 +35,7 @@ const register = async (req, res, next) => {
     const avatarURL = gravatar.url(
       email,
       { s: "200", r: "x", d: "retro" },
-      false
+      true
     );
 
     await User.create({
