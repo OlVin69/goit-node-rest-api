@@ -1,17 +1,18 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-
 import User from "../models/user.js";
-
 import {
   createUserSchema,
   updateSubscriptionSchema,
+  emailSchema,
 } from "../schemas/userSchema.js";
-
 import gravatar from "gravatar";
+import { sendMail } from "../mail/mail.js";
+import { v4 as uuidv4 } from "uuid";
 
 const register = async (req, res, next) => {
   const { email, password } = req.body;
+  const verificationToken = uuidv4();
 
   try {
     const { error } = createUserSchema.validate({
@@ -42,7 +43,10 @@ const register = async (req, res, next) => {
       email: emailInLowerCase,
       password: passwordHash,
       avatarURL,
+      verificationToken,
     });
+
+    sendMail(email, verificationToken);
 
     res.status(201).json({
       user: {
@@ -85,6 +89,10 @@ const login = async (req, res, next) => {
       return res
         .status(401)
         .json({ message: "Email or password is uncorrect" });
+    }
+
+    if (user.verify === false) {
+      return res.status(401).send({ message: "Please, verify your email" });
     }
 
     const token = jwt.sign(
@@ -157,4 +165,56 @@ const updateSubscription = async (req, res, next) => {
   }
 };
 
-export default { register, login, logout, getCurrent, updateSubscription };
+export const updateVerification = async (req, res, next) => {
+  try {
+    const { verificationToken } = req.params;
+
+    const user = await User.findOne({ verificationToken });
+    if (user === null) {
+      return res.status(404).send({ message: "User not found" });
+    }
+
+    await User.findByIdAndUpdate(user._id, {
+      verify: true,
+      verificationToken: null,
+    });
+    res.status(200).send({ message: "Verification successful" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const repeatVerification = async (req, res, next) => {
+  const { email } = req.body;
+  
+  if (!email) {
+    return res.status(400).send({ message: "missing required field email" });
+  }
+
+  try {
+    const { error } = emailSchema.validate({ email });
+    if (error) {
+      return res.status(400).send({ message: error.message });
+    }
+    const emailInLowerCase = email.toLowerCase();
+    const user = await User.findOne({ email: emailInLowerCase });
+    if (user === null) {
+      return res.status(400).send({ message: "Not found" });
+    }
+    const verificationToken = user.verificationToken;
+
+    if (user.verify) {
+      return res
+        .status(400)
+        .send({ message: "Verification has already been passed" });
+    }
+
+    sendMail(email, verificationToken);
+
+    res.status(200).send({ message: email });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export default { register, login, logout, getCurrent, updateSubscription, updateVerification, repeatVerification };
