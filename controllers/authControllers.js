@@ -211,7 +211,7 @@ export const repeatVerification = async (req, res, next) => {
 
     sendMail(email, verificationToken);
 
-    res.status(200).send({ message: email });
+    res.status(200).send({ message: "Verification email sent" });
   } catch (error) {
     next(error);
   }
